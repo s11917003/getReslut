@@ -1208,7 +1208,7 @@ func GetChainRandResult(thisStatusData bool, thisLotteryTypeGroupData string, bl
 	thisOpenResult = getResultNum(LottteryTypeGroup, 0)
 	var availableChain []interface{} //從Redis拉的區塊鍊資料
 
-	public.Println(fmt.Sprint("availableChain -------> blockChaintime  ", blockChaintime))
+	public.Println(fmt.Sprint("availableChain -------> blockChaintime TEST", blockChaintime))
 	if blockChaintime != 0 {
 		BlockTime := blockChaintime
 

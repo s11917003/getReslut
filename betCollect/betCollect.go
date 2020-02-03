@@ -550,7 +550,7 @@ func InspectModuleKuaiThree(LotteryTypeGroup int,
 										ContentAll := thisBOContent.(map[string]interface{})["1"].([]interface{})
 										//使用迴圈對獎，依下注的組合逐筆驗證
 
-										fmt.Println("====QQQQQQQQQQQQQQQQQQQQQQQQQQQQ==== ", thisFullResult[strconv.Itoa(LotteryMode)].(map[string]interface{})[strconv.Itoa(LotteryPlayGroup)].(map[string]interface{})[strconv.Itoa(LotteryPlay)])
+										// fmt.Println("====QQQQQQQQQQQQQQQQQQQQQQQQQQQQ==== ", thisFullResult[strconv.Itoa(LotteryMode)].(map[string]interface{})[strconv.Itoa(LotteryPlayGroup)].(map[string]interface{})[strconv.Itoa(LotteryPlay)])
 										for i := 0; i < len(ContentAll); i++ {
 											// fmt.Println("====QQQQQQQQQQQQQQQQQQQQQQQQQQQQ===>==== ", ContentAll[i])
 											// fmt.Println("====QQQQQQQQQQQQQQQQQQQQQQQQQQQQ===>==== ", betCount.In_array(ContentAll[i], thisFullResult[strconv.Itoa(LotteryMode)].(map[string]interface{})[strconv.Itoa(LotteryPlayGroup)].(map[string]interface{})[strconv.Itoa(LotteryPlay)]))

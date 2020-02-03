@@ -1,0 +1,103 @@
+package main
+
+import (
+	"fmt"
+	"getReslut/public/dbConnect"
+	"getReslut/result"
+	"log"
+	"net/http"
+	"strconv"
+
+	"github.com/gin-gonic/gin"
+)
+
+type IssueData struct {
+	TypGroup string  `form:"typeGroup" json:"typeGroup" binding:"required"`
+	Type     string  `form:"type" json:"type" binding:"required"`
+	Issue    string  `form:"issue" json:"issue" binding:"required"`
+	Status   bool    `form:"status" json:"status" binding:"exists"`
+	Ratio    float64 `form:"ratio" json:"ratio" binding:"required"`
+}
+
+type OrderData struct {
+	OderNumber string `form:"oderNumber" json:"oderNumber" binding:"required"`
+	Type       string `form:"type" json:"type" binding:"required"`
+	Issue      string `form:"issue" json:"issue" binding:"required"`
+	Status     string `form:"status" json:"status" binding:"required"`
+}
+
+func main() {
+
+	router := gin.Default()
+	router.POST("/getResult", func(c *gin.Context) {
+		var json IssueData
+
+		fmt.Println("c  ", c)
+		fmt.Println(" c.ShouldBindJSON(&json)   ", c.ShouldBindJSON(&json))
+
+		if err := c.ShouldBindJSON(&json); err == nil {
+			fmt.Println("json  ", json)
+
+			if json.Status == true {
+				thisLotteryTypeGroup := json.TypGroup
+				thisLotteryType := json.Type
+				thisLotteryIssue := json.Issue
+				status := json.Status
+				//thisRatio := json.Ratio
+				rtpData := dbConnect.GetRtpSetting(thisLotteryTypeGroup, thisLotteryType)
+				if rtpData["state"].(int) == 0 {
+					c.JSON(http.StatusOK, gin.H{"Status": false, "Error": 2, "Result": make([]string, 0)})
+					return
+				}
+				thisRatio, _ := strconv.ParseFloat(rtpData["result"].(string), 64)
+				// nowAmount, _ := strconv.ParseFloat(rtpData["amount"].(string), 64)
+				// nowBonus, _ := strconv.ParseFloat(rtpData["bonus"].(string), 64)
+				betOrderData := dbConnect.Run(thisLotteryTypeGroup, thisLotteryType, thisLotteryIssue)
+
+				if betOrderData["state"].(int) == 0 {
+					c.JSON(http.StatusOK, gin.H{"Status": false, "Error": 2, "Result": make([]string, 0)})
+				} else {
+					openResult := result.Run(betOrderData, status, rtpData, thisLotteryTypeGroup, thisLotteryType, thisLotteryIssue)
+					updateStatus := dbConnect.UpdateAmount(openResult["amount"].(float64), openResult["bonus"].(float64), thisLotteryTypeGroup, thisLotteryType, thisRatio)
+					fmt.Println("updateStatus  ", updateStatus)
+					if len(openResult) == 0 {
+						c.JSON(http.StatusOK, gin.H{"status": false, "Error": 2, "Result": make([]string, 0)})
+					} else {
+						c.JSON(http.StatusOK, gin.H{"status": true, "Error": 0, "Result": openResult["thisOpenResult"]})
+					}
+				}
+			} else {
+				c.JSON(http.StatusOK, gin.H{"status": false, "Error": 1, "Result": make([]string, 0)})
+				fmt.Println("c1111 22222 ")
+			}
+
+		} else {
+			fmt.Println("c1111  ")
+			c.JSON(http.StatusOK, gin.H{"status": false, "Error": 1, "Result": make([]string, 0)})
+		}
+
+	})
+
+	router.POST("/sendOrder", func(c *gin.Context) {
+		// 获取原始字节
+		var json OrderData
+
+		if err := c.ShouldBindJSON(&json); err == nil {
+			log.Println("------->", json)
+			log.Println("------->", json.Type)
+			log.Println("------->", json.Issue)
+			log.Println("------->", json.Status)
+			log.Println("------->", json.OderNumber)
+		} else {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		}
+		//log.Println(string(d))
+		c.JSON(http.StatusOK, gin.H{"status": "sendOrder successed"})
+	})
+	router.Run(":9205")
+
+}
+
+func getResult(context *gin.Context) {
+	context.String(http.StatusOK, "hello, world")
+}

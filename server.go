@@ -11,15 +11,14 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 	nowTime "time"
 
-	"strings"
-
 	"github.com/Unknwon/goconfig"
-
 	"github.com/gin-gonic/gin"
 )
 
+//自開彩資料
 type IssueData struct {
 	Issue    int64 `form:"issue" json:"issue" binding:"exists"`
 	TypGroup int64 `form:"typeGroup" json:"typeGroup" binding:"exists"`
@@ -27,6 +26,7 @@ type IssueData struct {
 	Status   bool  `form:"status" json:"status" binding:"exists"`
 }
 
+//區塊鍊資料
 type BlockChainIssueData struct {
 	TypGroup int64 `form:"typeGroup" json:"typeGroup" binding:"exists"`
 	Type     int64 `form:"type" json:"type" binding:"exists"`
@@ -35,12 +35,6 @@ type BlockChainIssueData struct {
 	Time     int64 `form:"time" json:"time" binding:"exists"`
 }
 
-// type OrderData struct {
-// 	OderNumber string `form:"oderNumber" json:"oderNumber" binding:"required"`
-// 	Type       string `form:"type" json:"type" binding:"required"`
-// 	Issue      string `form:"issue" json:"issue" binding:"required"`
-// 	Status     string `form:"status" json:"status" binding:"required"`
-// }
 var cfg *goconfig.ConfigFile
 
 func getCurrentDirectory() string {
@@ -77,25 +71,15 @@ func main() {
 			thisLotteryType := fmt.Sprint(json.Type)
 			thisLotteryIssue := fmt.Sprint(json.Issue)
 			status := json.Status
-			//thisRatio := json.Ratio
 			//撈RTP設定
-			//public.Println(fmt.Sprint("撈RTP設定 ------->   ", json.Status == true))
-
 			rtpData := dbConnect.GetRtpSetting(thisLotteryTypeGroup, thisLotteryType)
-			public.Println(fmt.Sprint("rtpData ------->   ", rtpData))
 			if rtpData["state"].(int) == 0 {
 				c.JSON(http.StatusOK, gin.H{"status": false, "error": 2, "result": make([]string, 0)})
 				return
 			}
 			thisRatio, _ := strconv.ParseFloat(rtpData["result"].(string), 64)
-			// nowAmount, _ := strconv.ParseFloat(rtpData["amount"].(string), 64)
-			// nowBonus, _ := strconv.ParseFloat(rtpData["bonus"].(string), 64)
 			//撈注單
-			//public.Println(fmt.Sprint("撈注單 ------->   ", json.Status == true))
 			betOrderData := dbConnect.Run(thisLotteryTypeGroup, thisLotteryType, thisLotteryIssue)
-			// public.Println(fmt.Sprint("1234 ------->   ", betOrderData))
-			// return
-			// public.Println(fmt.Sprint("1234 ------->   ", json.Status == true))
 			if betOrderData["state"].(int) == 0 {
 				c.JSON(http.StatusOK, gin.H{"status": false, "error": 2, "result": make([]string, 0)})
 			} else {
@@ -105,12 +89,8 @@ func main() {
 					c.JSON(http.StatusOK, gin.H{"status": true, "error": 0, "result": randResult["thisOpenResult"]})
 					return
 				}
-				public.Println(fmt.Sprint("123 ------->   ", json))
 				openResult := result.Run(betOrderData, status, rtpData, thisLotteryTypeGroup, thisLotteryType, thisLotteryIssue, 0)
-
 				amountData := dbConnect.GetRtpSetting(thisLotteryTypeGroup, thisLotteryType)
-				public.Println(fmt.Sprint("openResult     ", openResult))
-
 				amount := amountData["amount"].(float64)
 				bonus := amountData["bonus"].(float64)
 				isUpdate := true
@@ -176,35 +156,24 @@ func main() {
 			thisLotteryIssue := fmt.Sprint(json.Issue)
 
 			LotteryDrawTimeData := dbConnect.GetLotteryDrawTime(thisLotteryType, thisLotteryIssue)
-			public.Println(fmt.Sprint("rtpData ------->   ", LotteryDrawTimeData))
-
 			if LotteryDrawTimeData["datedraw"] == "0" {
 				c.JSON(http.StatusOK, gin.H{"status": false, "error": 2, "chainCode": "", "result": make([]string, 0)})
 				return
 			}
 			time, _ := strconv.ParseInt(LotteryDrawTimeData["datedraw"].(string), 10, 64)
-
-			//time := fmt.Sprint(json.Time)
 			status := json.Status
-			//thisRatio := json.Ratio
 			//撈RTP設定
-			//public.Println(fmt.Sprint("撈注單1234 ------->   ", json.Status == true))
 			rtpData := dbConnect.GetRtpSetting(thisLotteryTypeGroup, thisLotteryType)
-			public.Println(fmt.Sprint("rtpData ------->   ", rtpData))
+
 			if rtpData["state"].(int) == 0 {
 				c.JSON(http.StatusOK, gin.H{"status": false, "error": 2, "chainCode": "", "result": make([]string, 0)})
 				return
 			}
 
-			public.Println(fmt.Sprint("rtpData ------->   ", LotteryDrawTimeData))
 			thisRatio, _ := strconv.ParseFloat(rtpData["result"].(string), 64)
-			// nowAmount, _ := strconv.ParseFloat(rtpData["amount"].(string), 64)
-			// nowBonus, _ := strconv.ParseFloat(rtpData["bonus"].(string), 64)
+
 			//撈注單
-			//public.Println(fmt.Sprint("撈注單 ------->   ", json.Status == true))
 			betOrderData := dbConnect.Run(thisLotteryTypeGroup, thisLotteryType, thisLotteryIssue)
-			// public.Println(fmt.Sprint("1234 ------->   ", betOrderData))
-			// public.Println(fmt.Sprint("1234 ------->   ", json.Status == true))
 			if betOrderData["state"].(int) == 0 {
 				c.JSON(http.StatusOK, gin.H{"status": false, "error": 2, "chainCode": "", "result": make([]string, 0)})
 			} else {
@@ -234,10 +203,7 @@ func main() {
 					amountData := dbConnect.GetRtpSetting(thisLotteryTypeGroup, thisLotteryType)
 					amount := amountData["amount"].(float64)
 					bonus := amountData["bonus"].(float64)
-
 					isUpdate := true
-					public.Println(fmt.Sprint("Rtp amount   ", amount))
-					public.Println(fmt.Sprint("Rtp bonus   ", bonus))
 					t := nowTime.Now()
 					now := fmt.Sprintf("%4d-%02d-%02d %02d:%02d:%02d", t.Year(), t.Month(), t.Day(), t.Hour(), t.Minute(), t.Second())
 

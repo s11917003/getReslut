@@ -71,11 +71,5 @@ func GetDateForSpringBeginning() bool {
 	loc, _ := time.LoadLocation("PRC")
 
 	t1, _ := time.ParseInLocation("2006-01-02", fmt.Sprintf("20%d-02-0%d", int(YearF), date), loc)
-	// fmt.Println("date  t1 ", t1)
-
-	// fmt.Println("GetDateForSpringBeginning   ", t1.Unix())
-	// fmt.Println("GetDateForSpringBeginning   ", time.Now().Unix())
 	return time.Now().Unix() < t1.Unix()
-
-	//"20" + fmt.Sprintf("%f", YearF) + "-02-0" + fmt.Sprintf("%f", YearF)
 }

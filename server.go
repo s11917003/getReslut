@@ -252,6 +252,28 @@ func main() {
 		}
 
 	})
+
+	router.POST("/getBlockChainResultTest", func(c *gin.Context) {
+		var json BlockChainIssueData
+
+		c.ShouldBindJSON(&json)
+
+		if json.Status == true {
+
+			thisLotteryTypeGroup := fmt.Sprint(json.TypGroup)
+			hashCode := fmt.Sprint(json.HashCode)
+			// thisLotteryType := fmt.Sprint(json.Type)
+			// thisLotteryIssue := fmt.Sprint(json.Issue)
+
+			// LotteryDrawTimeData := dbConnect.GetLotteryDrawTime(thisLotteryType, thisLotteryIssue)
+			// time, _ := strconv.ParseInt(LotteryDrawTimeData["datedraw"].(string), 10, 64)
+			LottteryTypeGroup, _ := strconv.Atoi(thisLotteryTypeGroup)
+			randResult := result.GetHashCodeResult(LottteryTypeGroup, hashCode)
+
+			public.Println(fmt.Sprint("randResult -------> ", randResult))
+
+		}
+	})
 	// ConfigData := config.GetConfig()
 	// port := ":" + ConfigData["serverPort"].(string)
 

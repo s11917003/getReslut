@@ -94,11 +94,6 @@ func SetRtpRecord(amount float64, bonus float64, thisLotteryTypeGroup string, th
 		return false
 	}
 
-	// t := time.Now()
-	// // now := t.Unix()
-
-	// now := fmt.Sprintf("%4d-%02d-%02d %02d:%02d:%02d", t.Year(), t.Month(), t.Day(), t.Hour(), t.Minute(), t.Second())
-	// public.Println(fmt.Sprint("now -------> now  ", now))
 	sql := fmt.Sprintf(
 		"INSERT INTO M_RtpRecordDetail (LTG_Code,Gid,Issue,RtpSetting,RTPNow, Amount,Bonus,AddDate) value (%s,%s,%s,%f,%f,%f,%f,'%s')",
 		thisLotteryTypeGroup,
@@ -112,8 +107,6 @@ func SetRtpRecord(amount float64, bonus float64, thisLotteryTypeGroup string, th
 	)
 
 	fmt.Println("SetRtpRecord sql ", sql)
-	// stmt, err := db.Prepare(`UPDATE M_RtpSetting SET Amount=?,Bonus=? WHERE LTG_Code=? and Gid=? and RTP=?`)
-	// checkErr(err)
 	res, err := db.Exec(sql)
 	if err != nil {
 		log.Println("exec failed:", err, ", sql:", sql)
@@ -145,12 +138,6 @@ func SetAmount(amount float64, bonus float64, thisLotteryTypeGroup string, thisL
 		return false
 	}
 
-	// t := time.Now()
-	// // now := t.Unix()
-
-	// now := fmt.Sprintf("%4d-%02d-%02d %02d:%02d:%02d", t.Year(), t.Month(), t.Day(), t.Hour(), t.Minute(), t.Second())
-	// public.Println(fmt.Sprint("now -------> now  ", now))
-
 	currec := 0.0
 	if bonus == 0 {
 		currec = -(1 - thisRatio)
@@ -170,8 +157,7 @@ func SetAmount(amount float64, bonus float64, thisLotteryTypeGroup string, thisL
 	)
 
 	fmt.Println("setAmount sql ", sql)
-	// stmt, err := db.Prepare(`UPDATE M_RtpSetting SET Amount=?,Bonus=? WHERE LTG_Code=? and Gid=? and RTP=?`)
-	// checkErr(err)
+
 	res, err := db.Exec(sql)
 	if err != nil {
 		log.Println("exec failed:", err, ", sql:", sql)
@@ -206,9 +192,7 @@ func UpdateAmount(amount float64, bonus float64, thisLotteryTypeGroup string, th
 		sqlResult["state"] = 0
 		return false
 	}
-	// t := time.Now()
-	// now := fmt.Sprintf("%4d-%02d-%02d %02d:%02d:%02d", t.Year(), t.Month(), t.Day(), t.Hour(), t.Minute(), t.Second())
-	//public.Println(fmt.Sprint("now -------> now  ", now))
+
 	sql := fmt.Sprintf(
 		"UPDATE M_RtpSetting2 SET Exprec=1-RTP,Currec=1-(%f/%f),Amount=%f,Bonus=%f,Issue=Issue+1,DomputeDate='%s' WHERE LTG_Code=%s and Gid=%s and State = 1 AND Type = 1 ",
 		bonus,
@@ -221,8 +205,7 @@ func UpdateAmount(amount float64, bonus float64, thisLotteryTypeGroup string, th
 	)
 
 	fmt.Println(sql)
-	// stmt, err := db.Prepare(`UPDATE M_RtpSetting SET Amount=?,Bonus=? WHERE LTG_Code=? and Gid=? and RTP=?`)
-	// checkErr(err)
+
 	res, err := db.Exec(sql)
 	if err != nil {
 		log.Println("exec failed:", err, ", sql:", sql)
@@ -285,7 +268,6 @@ func GetLotteryDrawTime(thisLotteryType string, thisLotteryIssue string) map[str
 	}
 	db.Close()
 
-	//sqlResult["count"] = len(resultArr)
 	if len(resultArr) == 1 {
 		sqlResult["datedraw"] = resultArr[0].(map[string]string)["LD_DateDraw"]
 	}
@@ -357,9 +339,6 @@ func GetRtpSetting(thisLotteryTypeGroup string, thisLotteryType string) map[stri
 }
 
 func Run(thisLotteryTypeGroup string, thisLotteryType string, thisLotteryIssue string) map[string]interface{} {
-	//getDBConfig()
-	// dbCongig := getDBConfig()
-	// fmt.Println("dbCongig  ", dbCongig)
 	return SelectBetsList(thisLotteryTypeGroup, thisLotteryType, thisLotteryIssue, "0", "0")
 }
 

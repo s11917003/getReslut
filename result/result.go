@@ -960,7 +960,7 @@ func GetHashCodeResult(LottteryTypeGroup int, hashCode string) string {
 		}
 
 		thisOpenResultPCEgg := [3]int{0, 0, 0}
-
+		sort.Ints(resultArray)
 		for i := 0; i < 3; i++ {
 			for j := 0; j < 6; j++ {
 				thisOpenResultPCEgg[i] += resultArray[6*i+j]
@@ -1205,7 +1205,7 @@ func GetChainRandResult(thisStatusData bool, thisLotteryTypeGroupData string, bl
 	thisOpenResult := ""
 	var thisOpenResult1 []string
 
-	thisOpenResult = getResultNum(LottteryTypeGroup, 0)
+	//thisOpenResult = getResultNum(LottteryTypeGroup, 0)
 	var availableChain []interface{} //從Redis拉的區塊鍊資料
 
 	public.Println(fmt.Sprint("availableChain -------> blockChaintime  ", blockChaintime))

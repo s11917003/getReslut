@@ -1,6 +1,8 @@
 package result
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"fmt"
 	betcollect "getReslut/betCollect"
 	"getReslut/config"
@@ -900,18 +902,22 @@ func hexToBigInt(hex string) uint64 { //16轉10
 
 	// return n
 }
-func GetHashCodeResult(LottteryTypeGroup int, hashCode string) string {
+func GetHashCodeResult(LottteryTypeGroup int, code string) string {
 
 	newHashCode := ""
 	thisOpenResult := "" //獎號
 	var n uint64
 	var nn float64
+	h := sha256.New()
+	h.Write([]byte(code))
+	newCode := h.Sum(nil)
+	hashCode := hex.EncodeToString(newCode)
 	switch LottteryTypeGroup {
 	case 1, 3: //北京PK10 //幸运飞艇 // 1分PK10 // 3分PK10  PK10
 		var tempNumArray []string
 		var resultArray []string
-		for i := 0; i < 10; i++ {
-			tempNumArray = append(tempNumArray, fmt.Sprintf("%d", i))
+		for i := 1; i <= 10; i++ {
+			tempNumArray = append(tempNumArray, fmt.Sprintf("%.2d", i))
 		}
 
 		for i := 0; i < 9; i++ {
@@ -919,20 +925,24 @@ func GetHashCodeResult(LottteryTypeGroup int, hashCode string) string {
 			n = hexToBigInt(newHashCode)
 			nn = float64(n) / math.Pow(2, 64)
 
-			index := uint64(nn*10000000000) % uint64(10-i)
-			resultArray = append(resultArray, tempNumArray[index])
-			// if i != 10-1 {
-			tempNumArray = append(tempNumArray[:index], tempNumArray[index+1:]...)
-			// }
+			index := uint64(nn*1000000000) % uint64(10-i)
+			if index == 0 {
+				resultArray = append(resultArray, tempNumArray[0])
+				tempNumArray = append(tempNumArray[index+1:])
+			} else {
+				resultArray = append(resultArray, tempNumArray[index-1])
+				tempNumArray = append(tempNumArray[:index-1], tempNumArray[index:]...)
+			}
 		}
 		resultArray = append(resultArray, tempNumArray[0])
 		thisOpenResult = strings.Join(resultArray, ",")
 
-	case 2:
+	case 2: //
 		newHashCode = getPartOfHashCode(hashCode, 0, 16)
 		n = hexToBigInt(newHashCode)
 		nn := float64(n) / math.Pow(2, 64)
-		thisOpenResult = strings.Join(strings.Split(fmt.Sprintf("%5.0F", nn*100000), ""), ",")
+		nnn := int(nn * 100000)
+		thisOpenResult = strings.Join(strings.Split(fmt.Sprintf("%5d", nnn), ""), ",")
 
 	case 4: //PC蛋蛋 // 1分 PC蛋蛋 // 3分 PC蛋蛋
 		var resultArray []int
@@ -953,10 +963,17 @@ func GetHashCodeResult(LottteryTypeGroup int, hashCode string) string {
 			// fmt.Println("    newHashCode ", newHashCode)
 			n = hexToBigInt(newHashCode)
 			nn = float64(n) / math.Pow(2, 64)
-
 			index := uint64(nn*1000000000) % uint64(80-i)
-			resultArray = append(resultArray, tempNumArray[index])
-			tempNumArray = append(tempNumArray[:index], tempNumArray[index+1:]...)
+			if index == 0 {
+				resultArray = append(resultArray, tempNumArray[len(tempNumArray)-1])
+				tempNumArray = append(tempNumArray[:len(tempNumArray)-1])
+			} else {
+				resultArray = append(resultArray, tempNumArray[index-1])
+				tempNumArray = append(tempNumArray[:index-1], tempNumArray[index:]...)
+			}
+
+			// resultArray = append(resultArray, tempNumArray[index])
+			// tempNumArray = append(tempNumArray[:index], tempNumArray[index+1:]...)
 		}
 
 		thisOpenResultPCEgg := [3]int{0, 0, 0}
@@ -983,13 +1000,18 @@ func GetHashCodeResult(LottteryTypeGroup int, hashCode string) string {
 			newHashCode = getPartOfHashCode(hashCode, 0+i*8, 16)
 			n = hexToBigInt(newHashCode)
 			nn = float64(n) / math.Pow(2, 64)
-
+			// public.Println(fmt.Sprint("nn -------> ", nn))
+			// public.Println(fmt.Sprint("uint64(nn*1000000000) -------> ", uint64(nn*1000000000)))
 			index := uint64(nn*1000000000) % uint64(49-i)
 
-			resultArray = append(resultArray, tempNumArray[index])
-			tempNumArray = append(tempNumArray[:index], tempNumArray[index+1:]...)
+			if index == 0 {
+				resultArray = append(resultArray, tempNumArray[len(tempNumArray)-1])
+				tempNumArray = append(tempNumArray[:len(tempNumArray)-1])
+			} else {
+				resultArray = append(resultArray, tempNumArray[index-1])
+				tempNumArray = append(tempNumArray[:index-1], tempNumArray[index:]...)
+			}
 
-			//resultArray = append(resultArray, strconv.Itoa(int(num)))
 		}
 		//resultArray = append(resultArray, tempNumArray[0])
 
@@ -1008,8 +1030,12 @@ func GetHashCodeResult(LottteryTypeGroup int, hashCode string) string {
 			n = hexToBigInt(newHashCode)
 			nn = float64(n) / math.Pow(2, 64)
 
-			num := uint64(nn*1000000000)%uint64(6) + 1
-			resultArray = append(resultArray, strconv.Itoa(int(num)))
+			index := uint64(nn*1000000000) % uint64(6)
+			if index == 0 {
+				resultArray = append(resultArray, "6")
+			} else {
+				resultArray = append(resultArray, strconv.Itoa(int(index)))
+			}
 		}
 		thisOpenResult = strings.Join(resultArray, ",")
 

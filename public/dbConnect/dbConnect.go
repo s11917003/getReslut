@@ -54,14 +54,35 @@ func SetLotteryDrawChainCode(thisLotteryType string, thisLotteryIssue string, ch
 		sqlResult["state"] = 0
 		return false
 	}
+	sql := ""
+	if thisLotteryType == "34" {
 
-	sql := fmt.Sprintf(
-		"INSERT INTO TS_LotteryDrawChainCode (LDC_LotteryType,LDC_Issue,LDC_LotteryDrawChainCode,LDC_OpenResult,LDC_CreateTime) value (%s,%s,'%s','[%s]',UNIX_TIMESTAMP())",
-		thisLotteryType,
-		thisLotteryIssue,
-		chainCode,
-		strings.Join(thisOpenResult, ","),
-	)
+		var thisOpenResultInt = []int{}
+
+		for _, i := range thisOpenResult {
+			j, err := strconv.Atoi(i)
+			if err != nil {
+				panic(err)
+			}
+			thisOpenResultInt = append(thisOpenResultInt, j)
+
+		}
+		sql = fmt.Sprintf(
+			"INSERT INTO TS_LotteryDrawChainCode (LDC_LotteryType,LDC_Issue,LDC_LotteryDrawChainCode,LDC_OpenResult,LDC_CreateTime) value (%s,%s,'%s','[%s]',UNIX_TIMESTAMP())",
+			thisLotteryType,
+			thisLotteryIssue,
+			chainCode,
+			strings.Trim(strings.Replace(fmt.Sprint(thisOpenResultInt), " ", ",", -1), "[]"),
+		)
+	} else {
+		sql = fmt.Sprintf(
+			"INSERT INTO TS_LotteryDrawChainCode (LDC_LotteryType,LDC_Issue,LDC_LotteryDrawChainCode,LDC_OpenResult,LDC_CreateTime) value (%s,%s,'%s','[%s]',UNIX_TIMESTAMP())",
+			thisLotteryType,
+			thisLotteryIssue,
+			chainCode,
+			strings.Join(thisOpenResult, ","),
+		)
+	}
 
 	fmt.Println("SetDrawChainCode sql ", sql)
 

@@ -19,7 +19,7 @@ import (
 	"github.com/Unknwon/goconfig"
 )
 
-var DEBUG = false
+var DEBUG = true
 var cfg *goconfig.ConfigFile
 var gameCodemap map[string]interface{}
 
@@ -56,10 +56,7 @@ func GetgameCodeMap() map[string]interface{} {
 	gameCode["lt"] = [6]int{8, 9, 10, 36, 37, 42}
 	gameCodeMap["kuaiThree"] = gameCode
 
-	fmt.Println("gameCo1111111111111de ")
-	fmt.Println("gameCode ", gameCodeMap)
 	return gameCodeMap
-
 }
 
 func ConfigInit(config *goconfig.ConfigFile) {
@@ -95,10 +92,6 @@ func GetConfig() map[string]interface{} {
 	redisPassword, _ := cfg.GetValue("redis", "redisPassword")
 	redisDB, _ := cfg.GetValue("redis", "redisDB")
 	redisDBInt, _ := strconv.Atoi(redisDB)
-	// err := cfg.Reload() //重载配置
-	// if err != nil {
-	// 	fmt.Printf("reload config file error: %s", err)
-	// }
 
 	//台北
 	// ConfigData["ip"] = "192.168.88.181"
@@ -141,7 +134,7 @@ func GetConfig() map[string]interface{} {
 	ConfigData["redisPort"] = redisPort
 	ConfigData["redisPassword"] = redisPassword
 	ConfigData["redisDB"] = redisDBInt
-	// fmt.Println("ConfigData ", ConfigData)
+
 	return ConfigData
 }
 func GetRedisConfig() map[string]interface{} {
@@ -158,7 +151,6 @@ func GetRedisConfig() map[string]interface{} {
 
 func GetDBConfig() string {
 
-	// fmt.Printf("GetDBConfig: %s", cfg)
 	dbConfigData := GetConfig()
 
 	connStr := dbConfigData["user"].(string) + ":" + dbConfigData["password"].(string) +
@@ -259,9 +251,6 @@ func ReplaceRealContent(LotteryTypeGroup int,
 			newLotteryContent = strings.Replace(newLotteryContent, "\"]", "", -1)
 			newLotteryContent = strings.Replace(newLotteryContent, "\", \"", ",", -1)
 
-			//newLotteryContent := strings.Split(LotteryContent.(string), ",")
-			// _data := make([]interface{}, 0)
-			// _data = append(_data, strings.Split(LotteryContent.(string), ","))
 			_data2 := strings.Split(newLotteryContent, ",")
 			_data := make([]interface{}, 0)
 			for i := 0; i < len(_data2); i++ {
@@ -376,9 +365,7 @@ func ReplaceRealResult(lotteryTypeGroup int,
 	result["Info"] = ""
 
 	result["FullResult"] = make(map[string]interface{})
-	// fmt.Println("lotteryTypeGroup   =>   ", lotteryTypeGroup)
 
-	// fmt.Println("lotteryType   =>   ", lotteryType)
 	switch lotteryTypeGroup {
 	case 1, 3:
 		switch lotteryType {
@@ -515,10 +502,6 @@ func ReplaceModuleMarkSix(lotteryTypeGroup int,
 	Zodiac := config["LTR_Zodiac"].(map[string]interface{})
 	// 取得五行的分類資料 (LTG: 5)
 	Elements := config["LTR_FiveElements"].(map[string]interface{})
-	// fmt.Println(" BigOrSmallBase  ", BigOrSmallBase)
-	// fmt.Println(" DragonOrTigerBase  ", DragonOrTigerBase)
-	// fmt.Println(" TotalBase  ", TotalBase)
-	//fmt.Println(" TotalBigOrSmallBase  ", TotalBigOrSmallBase)
 
 	switch lotteryTypeGroup {
 	//六合彩
@@ -1088,11 +1071,6 @@ func ReplaceModuleMarkSix(lotteryTypeGroup int,
 						keys = append(keys, key)
 					}
 					sort.Slice(keys, func(i, j int) bool { return OpenResultWaveCount[keys[i]] > OpenResultWaveCount[keys[j]] })
-
-					// for _, key := range keys {
-					// 	fmt.Printf("%s, %d\n", key, counts[key])
-					// }
-
 					OpenResultAllWaveCount = keys[0]
 				}
 
@@ -1572,8 +1550,6 @@ func ReplaceModulePCEgg(lotteryTypeGroup int,
 	LotteryPlayGroup := 0
 	LotteryPlay := 0
 
-	// fmt.Println("OpenResultInt ", OpenResultInt)
-	// fmt.Println("OpenResultFloat64 ", OpenResultFloat64)
 	//取得大小的判斷基準 (LTG: 1, 2, 4, 7, 10)
 	BigOrSmallBase := int(config["LTR_BigOrSmallBase"].(float64))
 	// 取得龙虎的判斷基準 (LTG: 1, 3, 6, 10)
@@ -1633,8 +1609,6 @@ func ReplaceModulePCEgg(lotteryTypeGroup int,
 				t = append([]interface{}{s}, t...)
 
 				//极大 or 极小 (XB|XS)
-				// fmt.Println("OpenResultTotal ", OpenResultTotal)
-				// fmt.Println("ExtremeSmallBase ", ExtremeSmallBase)
 				if OpenResultTotal > ExtremeBigBase {
 					s = "XB"
 					t = append([]interface{}{s}, t...)
@@ -1642,7 +1616,7 @@ func ReplaceModulePCEgg(lotteryTypeGroup int,
 					s = "XS"
 					t = append([]interface{}{s}, t...)
 				}
-				// fmt.Println("s  ", s)
+
 				s = ""
 				//单 or 双 (O|E)
 				if OpenResultTotal%2 > 0 {
@@ -1685,7 +1659,7 @@ func ReplaceModulePCEgg(lotteryTypeGroup int,
 			}
 		}
 	}
-	//fmt.Println("Result ", Result)
+
 	return Result
 }
 func ReplaceModulePKTen(lotteryTypeGroup int,

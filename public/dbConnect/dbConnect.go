@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"getReslut/config"
+	"getReslut/public"
 	"log"
 	"strconv"
 	"strings"
@@ -55,7 +56,9 @@ func SetLotteryDrawChainCode(thisLotteryType string, thisLotteryIssue string, ch
 		return false
 	}
 	sql := ""
-	if thisLotteryType == "34" {
+
+	thisLotteryTypeInt, err := strconv.Atoi(thisLotteryType)
+	if public.Contains(thisLotteryTypeInt, config.GetgameCodeMap()["pk10"].(map[string]interface{})["lt"].([]int)) {
 
 		var thisOpenResultInt = []int{}
 

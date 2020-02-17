@@ -776,10 +776,7 @@ func GetHashCodeResult(LottteryTypeGroup int, code string) string {
 
 	var n uint64
 	var nn float64
-	h := sha256.New()
-	h.Write([]byte(code))
-	newCode := h.Sum(nil)
-	hashCode := hex.EncodeToString(newCode)
+
 	switch LottteryTypeGroup {
 	case 1, 3: //北京PK10 //幸运飞艇 // 1分PK10 // 3分PK10  PK10
 		var tempNumArray []string
@@ -838,9 +835,6 @@ func GetHashCodeResult(LottteryTypeGroup int, code string) string {
 				resultArray = append(resultArray, tempNumArray[index-1])
 				tempNumArray = append(tempNumArray[:index-1], tempNumArray[index:]...)
 			}
-
-			// resultArray = append(resultArray, tempNumArray[index])
-			// tempNumArray = append(tempNumArray[:index], tempNumArray[index+1:]...)
 		}
 
 		thisOpenResultPCEgg := [3]int{0, 0, 0}

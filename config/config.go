@@ -19,7 +19,7 @@ import (
 	"github.com/Unknwon/goconfig"
 )
 
-var DEBUG = true
+var DEBUG = false
 var cfg *goconfig.ConfigFile
 var gameCodemap map[string]interface{}
 
@@ -32,28 +32,28 @@ func GetgameCodeMap() map[string]interface{} {
 
 	gameCode := make(map[string]interface{})
 	//北京PK10 //幸运飞艇 // 區塊鏈 PK10 // 1分PK10 // 3分PK10
-	gameCode["ltg"] = [2]int{1, 3}
-	gameCode["lt"] = [5]int{1, 5, 31, 34, 35}
+	gameCode["ltg"] = []int{1, 3}
+	gameCode["lt"] = []int{1, 5, 31, 34, 35}
 	gameCodeMap["pk10"] = gameCode
 	// 30 區塊鏈時時彩
 	gameCode = make(map[string]interface{})
-	gameCode["ltg"] = [1]int{2}
-	gameCode["lt"] = [8]int{2, 3, 4, 26, 27, 28, 29, 30}
+	gameCode["ltg"] = []int{2}
+	gameCode["lt"] = []int{2, 3, 4, 26, 27, 28, 29, 30}
 	gameCodeMap["shishi."] = gameCode
 	//PC蛋蛋 //區塊鏈 PC蛋蛋 // 1分 PC蛋蛋 // 3分 PC蛋蛋
 	gameCode = make(map[string]interface{})
-	gameCode["ltg"] = [1]int{4}
-	gameCode["lt"] = [4]int{6, 33, 40, 41}
+	gameCode["ltg"] = []int{4}
+	gameCode["lt"] = []int{6, 33, 40, 41}
 	gameCodeMap["pcegg"] = gameCode
 	//六合彩 //區塊鏈六合彩 // 1分六合彩 // 5分六合彩
 	gameCode = make(map[string]interface{})
-	gameCode["ltg"] = [1]int{5}
-	gameCode["lt"] = [4]int{7, 32, 38, 39}
+	gameCode["ltg"] = []int{5}
+	gameCode["lt"] = []int{7, 32, 38, 39}
 	gameCodeMap["markSixTrad"] = gameCode
 
 	gameCode = make(map[string]interface{})
-	gameCode["ltg"] = [1]int{6}
-	gameCode["lt"] = [6]int{8, 9, 10, 36, 37, 42}
+	gameCode["ltg"] = []int{6}
+	gameCode["lt"] = []int{8, 9, 10, 36, 37, 42}
 	gameCodeMap["kuaiThree"] = gameCode
 
 	return gameCodeMap

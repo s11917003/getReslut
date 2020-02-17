@@ -800,7 +800,7 @@ func GetHashCodeResult(LottteryTypeGroup int, code string) string {
 				tempNumArray = append(tempNumArray[:index-1], tempNumArray[index:]...)
 			}
 		}
-
+		resultArray = append(resultArray, tempNumArray[0])
 		thisOpenResult = strings.Join(resultArray, ",")
 
 	case 2: //

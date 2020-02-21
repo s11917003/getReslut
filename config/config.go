@@ -54,7 +54,7 @@ func GetgameCodeMap() map[string]interface{} {
 	gameCode = make(map[string]interface{})
 	gameCode["ltg"] = []int{6}
 	gameCode["lt"] = []int{8, 9, 10, 36, 37, 42}
-	gameCodeMap["kuaiThree"] = gameCode
+	gameCodeMap["kuaiThree"] = gameCode 
 
 	return gameCodeMap
 }

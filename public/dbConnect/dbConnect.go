@@ -35,7 +35,7 @@ var ConfigData map[string]interface{}
 // 		dbConfigData["database"].(string) + "?charset=" + dbConfigData["charset"].(string)
 // 	return connStr
 // }
-func SetLotteryDrawChainCode(thisLotteryType string, thisLotteryIssue string, chainCode string, thisOpenResult []string) bool {
+func SetLotteryDrawChainCode(thisLotteryType string, thisLotteryIssue string, chainCode string, thisOpenResult []string, datedrawTime int64) bool {
 
 	dbCongig := config.GetDBConfig()
 	sqlResult := make(map[string]interface{})
@@ -71,19 +71,21 @@ func SetLotteryDrawChainCode(thisLotteryType string, thisLotteryIssue string, ch
 
 		}
 		sql = fmt.Sprintf(
-			"INSERT INTO TS_LotteryDrawChainCode (LDC_LotteryType,LDC_Issue,LDC_LotteryDrawChainCode,LDC_OpenResult,LDC_CreateTime) value (%s,%s,'%s','[%s]',UNIX_TIMESTAMP())",
+			"INSERT INTO TS_LotteryDrawChainCode (LDC_LotteryType,LDC_Issue,LDC_LotteryDrawChainCode,LDC_OpenResult,LDC_CreateTime,LDC_DataDrawTime) value (%s,%s,'%s','[%s]',UNIX_TIMESTAMP(),%d)",
 			thisLotteryType,
 			thisLotteryIssue,
 			chainCode,
 			strings.Trim(strings.Replace(fmt.Sprint(thisOpenResultInt), " ", ",", -1), "[]"),
+			datedrawTime,
 		)
 	} else {
 		sql = fmt.Sprintf(
-			"INSERT INTO TS_LotteryDrawChainCode (LDC_LotteryType,LDC_Issue,LDC_LotteryDrawChainCode,LDC_OpenResult,LDC_CreateTime) value (%s,%s,'%s','[%s]',UNIX_TIMESTAMP())",
+			"INSERT INTO TS_LotteryDrawChainCode (LDC_LotteryType,LDC_Issue,LDC_LotteryDrawChainCode,LDC_OpenResult,LDC_CreateTime,LDC_DataDrawTime) value (%s,%s,'%s','[%s]',UNIX_TIMESTAMP(),%d)",
 			thisLotteryType,
 			thisLotteryIssue,
 			chainCode,
 			strings.Join(thisOpenResult, ","),
+			datedrawTime,
 		)
 	}
 

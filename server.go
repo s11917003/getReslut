@@ -160,7 +160,7 @@ func main() {
 				c.JSON(http.StatusOK, gin.H{"status": false, "error": 2, "chainCode": "", "result": make([]string, 0)})
 				return
 			}
-			time, _ := strconv.ParseInt(LotteryDrawTimeData["datedraw"].(string), 10, 64)
+			datedrawTime, _ := strconv.ParseInt(LotteryDrawTimeData["datedraw"].(string), 10, 64)
 			status := json.Status
 			//撈RTP設定
 			rtpData := dbConnect.GetRtpSetting(thisLotteryTypeGroup, thisLotteryType)
@@ -178,7 +178,7 @@ func main() {
 				c.JSON(http.StatusOK, gin.H{"status": false, "error": 2, "chainCode": "", "result": make([]string, 0)})
 			} else {
 				if len(betOrderData["result"].([]interface{})) == 0 { //有期號 但無注單
-					randResult := result.GetChainRandResult(status, thisLotteryTypeGroup, time)
+					randResult := result.GetChainRandResult(status, thisLotteryTypeGroup, datedrawTime)
 					public.Println(fmt.Sprint("有期號 但無注單 -------> ", randResult))
 
 					if len(randResult) == 0 {
@@ -186,7 +186,7 @@ func main() {
 						c.JSON(http.StatusOK, gin.H{"status": false, "error": 3, "chainCode": "", "result": make([]string, 0)})
 					} else {
 						public.Println(fmt.Sprint("有期號 但無注單 openResult -------> ", randResult))
-						dbConnect.SetLotteryDrawChainCode(thisLotteryType, thisLotteryIssue, randResult["chainCode"].(string), randResult["thisOpenResult"].([]string))
+						dbConnect.SetLotteryDrawChainCode(thisLotteryType, thisLotteryIssue, randResult["chainCode"].(string), randResult["thisOpenResult"].([]string), datedrawTime)
 						c.JSON(http.StatusOK, gin.H{"status": true, "error": 0, "chainCode": randResult["chainCode"].(string), "result": randResult["thisOpenResult"]})
 					}
 
@@ -194,11 +194,11 @@ func main() {
 				}
 				public.Println(fmt.Sprint("123 ------->   ", json))
 
-				if time <= 0 {
+				if datedrawTime <= 0 {
 					c.JSON(http.StatusOK, gin.H{"status": true, "error": 3, "chainCode": "", "result": make([]string, 0)})
 					return
 				}
-				openResult := result.Run(betOrderData, status, rtpData, thisLotteryTypeGroup, thisLotteryType, thisLotteryIssue, time)
+				openResult := result.Run(betOrderData, status, rtpData, thisLotteryTypeGroup, thisLotteryType, thisLotteryIssue, datedrawTime)
 				if len(openResult) > 0 {
 					amountData := dbConnect.GetRtpSetting(thisLotteryTypeGroup, thisLotteryType)
 					amount := amountData["amount"].(float64)
@@ -244,7 +244,7 @@ func main() {
 				} else {
 					public.Println(fmt.Sprint("openResult -------> ", openResult))
 					c.JSON(http.StatusOK, gin.H{"status": true, "error": 0, "chainCode": openResult["chainCode"], "result": openResult["thisOpenResult"]})
-					dbConnect.SetLotteryDrawChainCode(thisLotteryType, thisLotteryIssue, openResult["chainCode"].(string), openResult["thisOpenResult"].([]string))
+					dbConnect.SetLotteryDrawChainCode(thisLotteryType, thisLotteryIssue, openResult["chainCode"].(string), openResult["thisOpenResult"].([]string), datedrawTime)
 				}
 			}
 		} else {

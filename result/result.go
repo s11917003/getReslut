@@ -18,6 +18,15 @@ import (
 	"github.com/seehuhn/mt19937"
 )
 
+/*
+	betOrdersData 	注單
+	thisStatusData 	request資料是否正確
+	thisRatioData	套用的RTP
+	thisLotteryTypeGroupData 彩種群組編碼
+	thisLotteryTypeData 彩種編碼
+	thisLotteryIssueData 期號
+	blockChaintime 區塊練開獎時間  為0時為自開彩
+*/
 func Run(betOrdersData map[string]interface{}, thisStatusData bool, thisRatioData map[string]interface{}, thisLotteryTypeGroupData string, thisLotteryTypeData string, thisLotteryIssueData string, blockChaintime int64) map[string]interface{} {
 
 	rng := rand.New(mt19937.New())
@@ -107,7 +116,7 @@ func Run(betOrdersData map[string]interface{}, thisStatusData bool, thisRatioDat
 		}
 		if betOrdersData["count"].(int) > 0 {
 			betOrders["BO"] = make(map[string]interface{})
-
+			//拆注單內容
 			for iBO1 := 0; iBO1 < betOrdersData["count"].(int); iBO1++ {
 				iBO := iBO1 % betOrdersData["count"].(int)
 				this_BO_Mode := betOrdersData["result"].([]interface{})[iBO].(map[string]string)["BO_Mode"]
@@ -131,8 +140,9 @@ func Run(betOrdersData map[string]interface{}, thisStatusData bool, thisRatioDat
 				this_BO_Winnings2, _ := strconv.ParseFloat(betOrdersData["result"].([]interface{})[iBO].(map[string]string)["BO_Winnings2"], 64)
 				this_BO_Winnings3, _ := strconv.ParseFloat(betOrdersData["result"].([]interface{})[iBO].(map[string]string)["BO_Winnings3"], 64)
 				this_BO_WinningLimit, _ := strconv.ParseFloat(betOrdersData["result"].([]interface{})[iBO].(map[string]string)["BO_WinningLimit"], 64)
-				// fmt.Println("this_BO_Mode  ", this_BO_Mode)
+
 				data := make(map[string]interface{})
+				//玩法群組模式 (1:傳統玩法 / 2:官方玩法)
 				if this_BO_Mode == "1" {
 					//帶入注單內容
 					betOrderListDetail := make(map[string]interface{})
@@ -170,7 +180,7 @@ func Run(betOrdersData map[string]interface{}, thisStatusData bool, thisRatioDat
 					}
 					lotteryPlayGroup, _ := strconv.Atoi(this_BO_LotteryPlayGroup)
 					lotteryPlay, _ := strconv.Atoi(this_BO_LotteryPlay)
-
+					//  兩面盤 特別拉出來 避免無法算到RTP的數字
 					switch thisLottteryTypeGroup {
 					//北京PK10  	//幸运飞艇
 					case 1, 3:
@@ -195,7 +205,6 @@ func Run(betOrdersData map[string]interface{}, thisStatusData bool, thisRatioDat
 							isOnlyTwoWayBet = false
 						}
 					default:
-
 						if lotteryPlayGroup != 1 || thisLottteryTypeGroup == 4 { //不為PC蛋蛋
 							isOnlyTwoWayBet = false
 						}
@@ -251,10 +260,12 @@ func Run(betOrdersData map[string]interface{}, thisStatusData bool, thisRatioDat
 
 		// public.Println(fmt.Sprint("二面 blockChaintime  ", blockChaintime))
 		var availableChain []interface{} //從Redis拉的區塊鍊資料
+
 		if blockChaintime != 0 {
 			BlockTime := blockChaintime
 
 			thisCount := 0
+			//若是區塊練 撈出 hashCode
 			for {
 				t := time.Unix(BlockTime+int64(thisCount), 0)
 				BlockChainKey := fmt.Sprintf("%d-%02d-%02d:%d", t.Year(), t.Month(), t.Day(), BlockTime+int64(thisCount))
@@ -283,9 +294,6 @@ func Run(betOrdersData map[string]interface{}, thisStatusData bool, thisRatioDat
 			resultArr = make([]interface{}, allResultCount) // 存各組開獎結果 輸贏資料
 			//===============================重新定義總筆數與權重資料長度===============================
 		}
-		// else {
-		// 	return make(map[string]interface{})
-		// }
 
 		if (betOrders != nil) && thisState != -1 {
 			//  有其他組合則跑完所有開獎結果
@@ -390,10 +398,8 @@ func Run(betOrdersData map[string]interface{}, thisStatusData bool, thisRatioDat
 							if _element["BC"].(interface{}) != "" {
 								thisBOContent = _element["BC"]
 							} else {
-
 								thisState = -1
 								errorCode = 1
-
 							}
 
 							if _element["LPG"].(string) != "" {
@@ -607,11 +613,11 @@ func Run(betOrdersData map[string]interface{}, thisStatusData bool, thisRatioDat
 		targetIndex := -1
 		smallestRatioIndex := 0 //找出最小RTP獎號
 		biggestRatioIndex := 0  //找出最大RTP獎號
-		// fmt.Println(" 計算所有組別獎號 基本權重後的平均RTP resultArr ", len(resultArr))
-		// fmt.Println(" 計算所有組別獎號 基本權重後的平均RTP resultArr ", resultArr)
+		// 兩面盤 直接抓index為1的隨機獎號
 		if isOnlyTwoWayBet == true {
 			targetIndex = 0
 		} else {
+			//將所有獎號 加成其機率後計算出期望值的RTP
 			for idx, item := range resultArr {
 				// fmt.Println(" idx ", idx)
 				// fmt.Println(" item ", item)
@@ -643,27 +649,21 @@ func Run(betOrdersData map[string]interface{}, thisStatusData bool, thisRatioDat
 				resultDataIndex := 0
 				resultDataIndex1 := 0
 				thisWeights := 0.0
-
+				//透過調整機率方式改變RTP
 				for nowRTP > targetRatio+0.0003 || nowRTP < targetRatio-0.0003 { //目前RTP過大或過小
 					cont++
 					// resultDataIndex := rng.Intn(len(resultArr))
 					// resultDataIndex1 = resultDataIndex
 					if nowRTP > targetRatio+0.003 { //往下調整RTP
-						// fmt.Println("往下調整RTP")
 						cont1++
 						resultDataIndex = availableList[rng.Intn(index)].(int)
 						thisWeights = resultArr[resultDataIndex].(map[string]interface{})["weights"].(float64)
 						num := (rng.Intn(10) + 10)
 
 						resultArr[resultDataIndex].(map[string]interface{})["weights"] = resultArr[resultDataIndex].(map[string]interface{})["weights"].(float64) * (1 / float64(num))
-
-						// fmt.Println("往下調整RTP, weights", resultArr[resultDataIndex].(map[string]interface{})["weights"], resultDataIndex)
 						allWeightsCount = allWeightsCount - thisWeights + resultArr[resultDataIndex].(map[string]interface{})["weights"].(float64)
-						//
-						// fmt.Println("往下調整RTP, allWeightsCount", allWeightsCount)
 
 					} else { //往上調整RTP
-						//resultDataIndex1 = availableList1[rng.Intn(index)].(int)
 						resultDataIndex1 = availableList[rng.Intn(index)].(int)
 						thisWeights = resultArr[resultDataIndex1].(map[string]interface{})["weights"].(float64)
 						num := 1 + float64(rng.Intn(7)+1)/10
@@ -714,8 +714,6 @@ func Run(betOrdersData map[string]interface{}, thisStatusData bool, thisRatioDat
 		return resultInfo
 
 	}
-
-	// return true
 	return make(map[string]interface{})
 }
 

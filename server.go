@@ -68,7 +68,9 @@ func main() {
 		/* 讀取request資料 */
 		c.ShouldBindJSON(&json)
 		public.Println(fmt.Sprint("自開彩開獎  ", json))
+
 		if json.Status == true {
+			status := json.Status
 			thisLotteryTypeGroup := fmt.Sprint(json.TypGroup)
 			thisLotteryType := fmt.Sprint(json.Type)
 			thisLotteryIssue := fmt.Sprint(json.Issue)
@@ -154,6 +156,7 @@ func main() {
 		public.Println(fmt.Sprint("區塊鍊開獎  ", json))
 
 		if json.Status == true {
+			status := json.Status
 			thisLotteryTypeGroup := fmt.Sprint(json.TypGroup)
 			thisLotteryType := fmt.Sprint(json.Type)
 			thisLotteryIssue := fmt.Sprint(json.Issue)

@@ -279,14 +279,11 @@ func Run(betOrdersData map[string]interface{}, thisStatusData bool, thisRatioDat
 
 				thisCount++
 				//撈超過10秒區間或者區塊鍊筆數超過100筆
-				if thisCount >= 10 || len(availableChain) >= 100 {
-
+				if thisCount >= 10 || len(availableChain) >= allResultCount {
 					break
 				}
 
 			}
-			//public.Println(fmt.Sprint("availableChain -------> availableChain  ", availableChain))
-			public.Println(fmt.Sprint("availableChain -------> availableChain  ", len(availableChain)))
 
 			//===============================重新定義總筆數與權重資料長度===============================
 			allResultCount = len(availableChain)
@@ -306,7 +303,6 @@ func Run(betOrdersData map[string]interface{}, thisStatusData bool, thisRatioDat
 				thisOpenResult = ""
 				hashCode = ""
 
-				public.Println(fmt.Sprint("availableChain -------> resultCount  ", resultCount))
 				//================================開獎號區START=======================
 				if blockChaintime != 0 { //區塊鍊開獎
 
@@ -348,7 +344,6 @@ func Run(betOrdersData map[string]interface{}, thisStatusData bool, thisRatioDat
 				}
 
 				//================================開獎號區END=======================
-				//	thisOpenResult1 = strings.Split(thisOpenResult, ",")
 				//從規則參數中，取得對獎結果記錄格式 (從 PlayRule 取得空預設值，或從資料庫取出目前值)
 
 				thisFullResult1 := thisLotteryConfig["LTR_ResultFormat"].(map[string]interface{})
@@ -619,8 +614,6 @@ func Run(betOrdersData map[string]interface{}, thisStatusData bool, thisRatioDat
 		} else {
 			//將所有獎號 加成其機率後計算出期望值的RTP
 			for idx, item := range resultArr {
-				// fmt.Println(" idx ", idx)
-				// fmt.Println(" item ", item)
 				if item.(map[string]interface{})["targetRatio"].(float64) > 0.0 {
 					nowRTP += item.(map[string]interface{})["weights"].(float64) / float64(allWeightsCount) * item.(map[string]interface{})["targetRatio"].(float64)
 				}
@@ -652,8 +645,6 @@ func Run(betOrdersData map[string]interface{}, thisStatusData bool, thisRatioDat
 				//透過調整機率方式改變RTP
 				for nowRTP > targetRatio+0.0003 || nowRTP < targetRatio-0.0003 { //目前RTP過大或過小
 					cont++
-					// resultDataIndex := rng.Intn(len(resultArr))
-					// resultDataIndex1 = resultDataIndex
 					if nowRTP > targetRatio+0.003 { //往下調整RTP
 						cont1++
 						resultDataIndex = availableList[rng.Intn(index)].(int)
@@ -676,13 +667,32 @@ func Run(betOrdersData map[string]interface{}, thisStatusData bool, thisRatioDat
 						nowRTP += item.(map[string]interface{})["weights"].(float64) / float64(allWeightsCount) * item.(map[string]interface{})["targetRatio"].(float64)
 					}
 				}
-				public.Println(fmt.Sprint("nowRTP  ", nowRTP))
+				r := 0 + rand.Float64()*(allWeightsCount-0)
 
-				targetIndex = rng.Intn(allResultCount)
+				tempWeightSum := 0.0
+				for idx, item := range resultArr {
+					tempWeightSum += item.(map[string]interface{})["weights"].(float64)
+
+					if r <= tempWeightSum {
+						targetIndex = idx
+						break
+					}
+				}
+
 				tempAmount := resultArr[targetIndex].(map[string]interface{})["allRealPrice"].(float64) + nowAmount
 				tempBonus := resultArr[targetIndex].(map[string]interface{})["allPrize"].(float64) + nowBonus
-				if nowRatio < 1 && tempBonus/tempAmount > targetRatio+0.04 { //超過太多重rand一次
-					targetIndex = rng.Intn(allResultCount)
+				if nowRatio < 1 && tempBonus/tempAmount > 1 { //超過太多重rand一次
+					public.Println(fmt.Sprint("超過太多重rand一次  "))
+					r := 0 + rand.Float64()*(allWeightsCount-0)
+					tempWeightSum := 0.0
+					for idx, item := range resultArr {
+						tempWeightSum += item.(map[string]interface{})["weights"].(float64)
+
+						if r <= tempWeightSum {
+							targetIndex = idx
+							break
+						}
+					}
 				}
 
 			}
@@ -692,8 +702,6 @@ func Run(betOrdersData map[string]interface{}, thisStatusData bool, thisRatioDat
 			return make(map[string]interface{})
 		}
 		resultInfo := make(map[string]interface{})
-		// fmt.Println(" item      ", resultArr)
-		// fmt.Println(" allWeightsCount      ", allWeightsCount)
 		if isOnlyTwoWayBet {
 			nowRTP += resultArr[0].(map[string]interface{})["weights"].(float64) / float64(allWeightsCount) * resultArr[0].(map[string]interface{})["targetRatio"].(float64)
 		} else {
@@ -898,7 +906,6 @@ func GetHashCodeResult(LottteryTypeGroup int, code string) string {
 
 }
 func getResultNum(LottteryTypeGroup int, count int) string {
-	// public.Println(fmt.Sprint("getResultNum ", 1))
 	rng := rand.New(mt19937.New())
 	rng.Seed(time.Now().UnixNano())
 	thisOpenResult := ""
@@ -906,9 +913,8 @@ func getResultNum(LottteryTypeGroup int, count int) string {
 
 	if LottteryTypeGroup == 2 {
 		for i := 0; i < drawNum; i++ {
-			//number := strconv.Itoa(rand.Intn(10)) //亂數產生
+			//亂數產生
 			number := ""
-
 			switch LottteryTypeGroup {
 			//时时彩
 			case 2:
@@ -964,7 +970,6 @@ func getResultNum(LottteryTypeGroup int, count int) string {
 			}
 			thisOpenResult += strconv.Itoa(v)
 		}
-		//public.Println(fmt.Sprint("thisOpenResult ", thisOpenResult))
 
 	} else if LottteryTypeGroup == 5 { //六合彩
 		drawNum = 7

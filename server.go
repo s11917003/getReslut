@@ -196,7 +196,6 @@ func main() {
 						public.Println(fmt.Sprint("openResult -------> ", 0))
 						c.JSON(http.StatusOK, gin.H{"status": false, "error": 3, "chainCode": "", "result": make([]string, 0)})
 					} else {
-						public.Println(fmt.Sprint("有期號 但無注單 openResult -------> ", randResult))
 						/* 直接開獎號 並寫入一筆區塊練開獎資料 */
 						dbConnect.SetLotteryDrawChainCode(thisLotteryType, thisLotteryIssue, randResult["chainCode"].(string), randResult["thisOpenResult"].([]string), datedrawTime)
 						c.JSON(http.StatusOK, gin.H{"status": true, "error": 0, "chainCode": randResult["chainCode"].(string), "result": randResult["thisOpenResult"]})

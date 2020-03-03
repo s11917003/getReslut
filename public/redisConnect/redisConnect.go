@@ -24,7 +24,7 @@ func GetBlockChain(key string) []interface{} {
 
 	defer client.Close()
 
-	val, err := client.LRange(key, 0, 1000).Result()
+	val, err := client.SMembers(key).Result()
 	if err != nil {
 		panic(err)
 	}
